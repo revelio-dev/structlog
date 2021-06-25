@@ -18,6 +18,7 @@ from structlog.processors import (
     ExceptionPrettyPrinter,
     JSONRenderer,
     KeyValueRenderer,
+    LogFmtRenderer,
     StackInfoRenderer,
     TimeStamper,
     UnicodeDecoder,
@@ -191,6 +192,16 @@ class TestJSONRenderer:
             "y": "test",
             "z": [1, 2],
         } == json.loads(jr(None, None, event_dict))
+
+
+class TestLogFmtRenderer:
+    def test_string_is_not_quoted(self, event_dict):
+        """
+        A string with no special chars should not be quoted.
+        """
+        rv = LogFmtRenderer()(None, None, event_dict)
+
+        assert r"a=<A(\o/)> b=[3, 4] x=7 y=test z=(1, 2)" == rv
 
 
 class TestTimeStamper:

@@ -8,6 +8,7 @@ Processors useful regardless of the logging framework.
 import datetime
 import json
 import operator
+import re
 import sys
 import time
 
@@ -43,6 +44,7 @@ __all__ = [
     "format_exc_info",
     "ExceptionPrettyPrinter",
     "StackInfoRenderer",
+    "LogFmtRenderer",
 ]
 
 
@@ -446,3 +448,22 @@ class StackInfoRenderer:
             )
 
         return event_dict
+
+
+class LogFmtRenderer(KeyValueRenderer):
+    """
+    Inherits from KeyValueRenderer to make output be logfmt compatible.
+
+    Useful with logfmt parsers like that of Loki.
+    """
+
+    def _logfmt_repr(self, inst: Any):
+        if isinstance(inst, str):
+            return json.dumps(inst) if re.search("\\W", inst) else inst
+        return repr(inst)
+
+    def __call__(self, _: WrappedLogger, __, event_dict: EventDict):
+        return " ".join(
+            k + "=" + self._logfmt_repr(v)
+            for k, v in self._ordered_items(event_dict)
+        )
