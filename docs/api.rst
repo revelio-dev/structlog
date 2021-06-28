@@ -226,6 +226,19 @@ API Reference
       >>> TimeStamper(fmt="%Y", key="year")(None, None, {})  # doctest: +SKIP
       {'year': '2013'}
 
+.. autofunction:: logfmt_repr
+
+   .. doctest::
+
+      >>> from structlog.processors import logfmt_repr
+      >>> logfmt_repr("string with withespace")
+      '"string with whitespace"'
+      >>> logfmt_repr("string")
+      'string'
+      >>> logfmt_repr(42)
+      '42'
+      >>> logfmt_repr(None)
+      'null'
 
 `structlog.stdlib` Module
 -------------------------
