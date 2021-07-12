@@ -52,7 +52,7 @@ def logfmt_repr(inst: Any) -> str:
     if inst is None:
         return "null"
     if isinstance(inst, str):
-        return json.dumps(inst) if re.search("\\W", inst) else inst
+        return json.dumps(inst) if re.search("\\s", inst) else inst
     return repr(inst)
 
 

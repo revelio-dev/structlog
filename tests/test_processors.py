@@ -576,8 +576,8 @@ class TestLogFmtRepr:
             ),  # a sentence in double quotes
             (42, "42"),  # int
             (3.14, "3.14"),  # float
-            ("127.0.0.1", '"127.0.0.1"'),  # an ip address
-            ("user@email.test", '"user@email.test"'),  # an email
+            ("127.0.0.1", "127.0.0.1"),  # an ip address
+            ("user@email.test", "user@email.test"),  # an email
             (None, "null"),  # NoneType
         ],
     )
