@@ -8,6 +8,7 @@ Processors useful regardless of the logging framework.
 import datetime
 import json
 import operator
+import re
 import sys
 import time
 
@@ -43,7 +44,23 @@ __all__ = [
     "format_exc_info",
     "ExceptionPrettyPrinter",
     "StackInfoRenderer",
+    "logfmt_repr",
 ]
+
+
+def logfmt_repr(inst: Any) -> str:
+    if inst is None:
+        return "null"
+    if isinstance(inst, str):
+        return json.dumps(inst) if re.search("\\s", inst) else inst
+    return repr(inst)
+
+
+def _repr(inst: Any) -> str:
+    if isinstance(inst, str):
+        return inst
+    else:
+        return repr(inst)
 
 
 class KeyValueRenderer:
@@ -60,10 +77,12 @@ class KeyValueRenderer:
         to native strings.
         Setting this to ``False`` is useful if you want to have human-readable
         non-ASCII output on Python 2.
+    :param repr_formatter: A callable to use as a custom :func:`repr()`.
 
     .. versionadded:: 0.2.0 *key_order*
     .. versionadded:: 16.1.0 *drop_missing*
     .. versionadded:: 17.1.0 *repr_native_str*
+    .. versionadded:: 21.2.0 *repr_formatter*
     """
 
     def __init__(
@@ -72,6 +91,7 @@ class KeyValueRenderer:
         key_order: Optional[Sequence[str]] = None,
         drop_missing: bool = False,
         repr_native_str: bool = True,
+        repr_formatter: Callable = _repr,
     ):
         # Use an optimized version for each case.
         if key_order and sort_keys is True:
@@ -113,14 +133,7 @@ class KeyValueRenderer:
         if repr_native_str is True:
             self._repr = repr
         else:
-
-            def _repr(inst: Any) -> str:
-                if isinstance(inst, str):
-                    return inst
-                else:
-                    return repr(inst)
-
-            self._repr = _repr
+            self._repr = repr_formatter
 
     def __call__(
         self, _: WrappedLogger, __: str, event_dict: EventDict

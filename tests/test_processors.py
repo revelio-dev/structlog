@@ -25,6 +25,7 @@ from structlog.processors import (
     _figure_out_exc_info,
     _json_fallback_handler,
     format_exc_info,
+    logfmt_repr,
 )
 from structlog.threadlocal import wrap_dict
 
@@ -123,6 +124,16 @@ class TestKeyValueRenderer:
 
         cnt = rv.count("哈")
         assert 2 == cnt
+
+    def test_repr_formatter(self, event_dict):
+        """
+        Injects a custom repr-like formatter when repr_native_str=False
+        """
+        rv = KeyValueRenderer(
+            repr_formatter=logfmt_repr, repr_native_str=False
+        )(None, None, event_dict)
+
+        assert r"a=<A(\o/)> b=[3, 4] x=7 y=test z=(1, 2)" == rv
 
 
 class TestJSONRenderer:
@@ -551,3 +562,27 @@ class TestFigureOutExcInfo:
         e = ValueError()
 
         assert (e.__class__, e, None) == _figure_out_exc_info(e)
+
+
+class TestLogFmtRepr:
+    @pytest.mark.parametrize(
+        "obj,expected",
+        [
+            ("word", "word"),  # plain word
+            ("a sentence", '"a sentence"'),  # a sentence with spaces
+            (
+                'a sentence "with quotes"',
+                '"a sentence \\"with quotes\\""',
+            ),  # a sentence in double quotes
+            (42, "42"),  # int
+            (3.14, "3.14"),  # float
+            ("127.0.0.1", "127.0.0.1"),  # an ip address
+            ("user@email.test", "user@email.test"),  # an email
+            (None, "null"),  # NoneType
+        ],
+    )
+    def test_logfmt_repr(self, obj, expected):
+        """
+        Ensure logfmt_repr produces logfmt-compatible strings
+        """
+        assert expected == logfmt_repr(obj)

@@ -32,6 +32,8 @@ Changes:
 - If the `better-exceptions <https://github.com/qix-/better-exceptions>`_ package is present, ``structlog.dev.ConsoleRenderer`` will now pretty-print exceptions using it.
   Pass ``pretty_exceptions=False`` to disable.
   This only works if ``format_exc_info`` is **absent** in the processor chain.
+- ``KeyValueRenderer`` now accepts an optional ``repr_formatter`` parameter to handle log representation.
+- Added logfmt_repr to make KeyValueRenderer output logfmt compatible.
 
 
 ----
